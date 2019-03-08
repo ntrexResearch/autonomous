@@ -13,6 +13,7 @@ void Engine::initialize()
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(run()));
     timer->start(100);
+    //canThread.start();
 }
 
 
@@ -30,9 +31,10 @@ Engine* Engine::Instance(QObject* _parent)
 
 /*
  * Engine main routine is included here.
+ * State machine
  */
 void Engine::run()
 {
     //
-    qDebug() << "Test";
+    //qDebug() << "Test";
 }

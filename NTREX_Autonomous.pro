@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui serialbus
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -27,19 +27,51 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    engine.cpp
+    engine.cpp \
+    Communication/canmanager.cpp \
+    canconnectdialog.cpp \
+    dialog.cpp \
+    bitratebox.cpp \
+    sendframebox.cpp \
+    cancommwidget.cpp \
+    thread.cpp \
+    worker.cpp \
+    canthread.cpp \
+    canmonitordialog.cpp
+
 
 
 
 HEADERS += \
         mainwindow.h \
-    engine.h
+    engine.h \
+    Communication/canmanager.h \
+    canconnectdialog.h \
+    dialog.h \
+    bitratebox.h \
+    sendframebox.h \
+    cancommwidget.h \
+    thread.h \
+    canconnectdialog.h \
+    thread.h \
+    worker.h \
+    common.h \
+    canthread.h \
+    canmonitordialog.h
 
+RESOURCES += image.qrc
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    canconnectdialog.ui \
+    dialog.ui \
+    sendframebox.ui \
+    cancommwidget.ui \
+    canmonitordialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES +=

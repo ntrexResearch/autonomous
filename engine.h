@@ -19,6 +19,8 @@ protected:
 private:
     QTimer *timer;
     static Engine* _instance;
+    //Thread canThread;
+
 
     void initialize();
 };
