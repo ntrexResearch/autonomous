@@ -9,16 +9,15 @@ CanMonitorDialog::CanMonitorDialog(QWidget *parent) :
     QDialog(parent),
     m_ui(new Ui::CanMonitorDialog)
 {
+
     m_ui->setupUi(this);
 
     initGui();
 
-
 }
 
 void CanMonitorDialog::initGui()
-{
-    m_statusBar = new QStatusBar;
+{    m_statusBar = new QStatusBar;
     m_status = new QLabel;
     m_written = new QLabel;
     m_statusBar->addPermanentWidget(m_status);
@@ -28,6 +27,7 @@ void CanMonitorDialog::initGui()
     m_ui->sendFrameBox->setEnabled(false);
     //m_ui->receivedMessagesEdit->
     m_ui->receivedMessagesEdit->setMaximumBlockCount(2000);
+    this->setWindowTitle("CAN Monitor Dialog");
 }
 
 SendFrameBox* CanMonitorDialog::getSendFrameBox()
@@ -61,8 +61,6 @@ CanMonitorDialog::~CanMonitorDialog()
 void CanMonitorDialog::showReceivedFrames(QString rxFrame)
 {
     m_ui->receivedMessagesEdit->appendPlainText(rxFrame);
-
-
 }
 
 

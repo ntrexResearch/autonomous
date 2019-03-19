@@ -4,6 +4,7 @@
 #include <QCanBus>
 #include <QDebug>
 #include <QMetaType>
+#include <QMenu>
 
 CanConnectDialog::CanConnectDialog(QWidget *parent) :
     QDialog(parent),
@@ -12,7 +13,23 @@ CanConnectDialog::CanConnectDialog(QWidget *parent) :
 
     m_ui->setupUi(this);
 
+    this->setWindowTitle("CAN Connect Dialog");
+
     m_ui->errorFilterEdit->setValidator(new QIntValidator(0, 0x1FFFFFFFU, this));
+
+    QMenu *file = new QMenu(this);
+    file->addMenu(tr("&File"));
+
+    QAction *okAction = new QAction(this);//file->addAction(tr("Ok"));
+    okAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Space));
+    QAction *closeAction = new QAction(this);//file->addAction(tr("Close"));
+    closeAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Q));
+
+    addAction(okAction);
+    addAction(closeAction);
+
+    connect(okAction, SIGNAL(triggered()), this, SLOT(ok()));
+    connect(closeAction, SIGNAL(triggered()), this, SLOT(close()));
 
     m_ui->loopbackCombo->addItem(tr("unspecified"), QVariant());
     m_ui->loopbackCombo->addItem(tr("false"), QVariant(false));
@@ -40,8 +57,8 @@ CanConnectDialog::CanConnectDialog(QWidget *parent) :
     debug_flag = false;
     m_ui->interfaceCombo->clear();
     m_interfaces = QCanBus::instance()->availableDevices("peakcan");
-//    for (const QCanBusDeviceInfo &info : qAsConst(m_interfaces))
-//        m_ui->interfaceCombo->addItem(info.name());
+    for (const QCanBusDeviceInfo &info : qAsConst(m_interfaces))
+        m_ui->interfaceCombo->addItem(info.name());
 }
 
 CanConnectDialog::~CanConnectDialog()

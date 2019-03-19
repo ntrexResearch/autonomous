@@ -6,9 +6,17 @@
 #include <QThread>
 #include <QTimer>
 
-class CanConnectDialog;
-class QCanBusFrame;
+// define all the command id and value
+// abs enc value
+// 200D status value
+// sevcon speed value and etc
+#define DCU_AUTO_REQUEST 1
+#define DCU_MANUAL_REQUEST 2
+#define SEVCON_INIT_REQUEST 10
+#define SEVCON_DRIVE_CMD    11
 
+
+class QCanBusFrame;
 
 class CanManager : public QObject
 {
@@ -17,12 +25,17 @@ public:
     static CanManager* Instance();
     ~CanManager();
     //void putCanManagerInAThread();
+    void sendDcuCanMsg(int index);
+    void sendCanMsg(quint32 id, int index, int data=0);
 
 signals:
     void notifyWrittenFrames(qint64);
     void showReceivedFrames(QString);
     void showStateMessage(QString) const;
     void sendConnectionState(bool);
+
+    void autoModeOn();
+    void manualModeOn();
 
 public slots:
     // Its can_device is connected to these slots.
@@ -41,6 +54,8 @@ public slots:
     void monitorOn();
     void monitorOff();
 
+    void activateDCU();
+
     //void updateSettings(Settings);
 
 protected:
@@ -49,6 +64,8 @@ protected:
 
 private:
     //void initActionsConnections();
+
+
 
     void initCanManager();
     int decodeFrame(const QCanBusFrame &frame);
@@ -62,7 +79,7 @@ private:
     static CanManager *_instance;
 
     QTimer *timer;
-    QCanBusFrame frame;
+    //QCanBusFrame frame;
 
     bool m_monitorFlag = false;
     bool m_connectionState = false;

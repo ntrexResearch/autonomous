@@ -5,7 +5,9 @@
 #include <QMainWindow>
 #include <engine.h>
 #include "canthread.h"
+#include <QStateMachine>
 
+class ManualControlDialog;
 class CanConnectDialog;
 class CanMonitorDialog;
 
@@ -30,24 +32,33 @@ public:
 
 private slots:
 
+    void updateCanConnectionState(bool);
 
     void on_AutoActivateButton_released();
 
     void on_ManualActivateButton_released();
 
+    void manualModeActivated();
+
+    void manualModeDeactivated();
+
 protected:
     void closeEvent(QCloseEvent *event) override;
 
 private:
-    void initActionsConnections();
+    void initialize();
 
     Ui::MainWindow *m_ui = nullptr;
 
     CanConnectDialog *m_canConnectDialog = nullptr;
     CanMonitorDialog *m_canMonitorDialog = nullptr;
+    ManualControlDialog *m_manualControlDialog = nullptr;
 
     Engine *engine;
+
     CanThread *canThread;
+
+    QStateMachine *m_system_machine;
 };
 
 #endif // MAINWINDOW_H

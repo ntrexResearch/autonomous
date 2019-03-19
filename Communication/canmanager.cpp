@@ -5,6 +5,8 @@
 //#include <mainwindow.h>
 #include <QDebug>
 #include <QMetaType>
+#include "common.h"
+#include "speedcontroller.h"
 
 CanManager* CanManager::_instance = nullptr;
 
@@ -13,10 +15,9 @@ CanManager::CanManager() : QObject()
     //QObject::connect();
 
     qRegisterMetaType<QCanBusDevice::CanBusError>();
-    QByteArray load = QByteArrayLiteral("\x12\x00\xa4");
-    frame = QCanBusFrame(16, load);
-    //timer = new QTimer();
-    //initCanManager();
+
+    timer = new QTimer();
+    initCanManager();
 }
 
 CanManager::~CanManager()
@@ -34,29 +35,19 @@ CanManager* CanManager::Instance()
 void CanManager::initCanManager()
 {
     QObject::connect(timer, SIGNAL(timeout()), this, SLOT(manageCan()));
-    timer->start(1000);
+    timer->start(50);
 }
 
-int CanManager::decodeFrame(const QCanBusFrame &frame)
+
+void CanManager::activateDCU()
 {
-    int value=0;
-    const QByteArray payload = frame.payload();
+    if ( ! m_canDevice)
+        return;
+    // Set dcu id and activate message
 
-    if(frame.isValid())
-    {
-        switch(frame.frameId())
-        {
-
-        }
-
-        return value;
-    }
-
-    value = 1;
-
-    return value;
-
+//    m_canDevice->writeFrame(frame);
 }
+
 
 QCanBusDevice::Filter CanManager::setCanFilter(const unsigned short &id)
 {
@@ -82,6 +73,32 @@ void CanManager::manageCan()
         //qDebug() << m_monitorFlag;
         //qDebug() << "Can test";
         if (m_canDevice){
+
+            //Check the controller objects
+            // Use the objects to control the robot
+            if (SpeedController::hasInstance()){
+                //Calculate the corresponding voltage
+                //Send the voltage with direction
+                if (SpeedController::Instance()->speedChanged()){
+                    int voltage = SpeedController::Instance()->calculateVoltageFromSpeed();
+
+                    sendCanMsg(SEVCON_CAN_ID, SEVCON_DRIVE_CMD, voltage);
+                }
+                //qDebug() <<"Success";
+            }
+
+            // Check all the objects. If none of them is enabled, it means that the
+            // can device is connected but DCU has not been activated- manual mode on.
+            else {
+                // Send DCU Manual request msgx
+                qDebug() <<"Requesting";
+
+
+                sendDcuCanMsg(DCU_MANUAL_REQUEST);
+
+
+            }
+
             //qDebug() << "connected";
             //m_canDevice->writeFrame()
 //            while (m_canDevice->framesAvailable())
@@ -239,7 +256,56 @@ void CanManager::monitorOff()
     m_monitorFlag = false;
 }
 
+int CanManager::decodeFrame(const QCanBusFrame &frame)
+{
+    int value=0;
+    const QByteArray payload = frame.payload();
 
+    if(frame.isValid())
+    {
+        switch(frame.frameId())
+        {
+            case PC_CAN_ID:
+            {
+                int x;
+                x = payload[0];
+                if (x == 1) {
+                    emit manualModeOn();
+                    //Here send Sevcon initialize message.
+                    sendCanMsg(SEVCON_CAN_ID, SEVCON_INIT_REQUEST);
+                }
+                else if (x == 2) {
+                    emit autoModeOn();
+                }
+
+                //else if (x == )
+
+                break;
+            }
+
+            case ABS_ENC_CAN_ID:
+            {
+
+                break;
+            }
+            case MW200D_CAN_ID:
+            {
+
+                break;
+            }
+
+            //case
+
+        }
+
+        return value;
+    }
+
+    value = 1;
+
+    return value;
+
+}
 void CanManager::processReceivedFrames()
 {
     if (!m_canDevice)
@@ -247,7 +313,7 @@ void CanManager::processReceivedFrames()
 
     while (m_canDevice->framesAvailable()) {
         const QCanBusFrame frame = m_canDevice->readFrame();
-
+        decodeFrame(frame);
         QString view;
         if (frame.frameType() == QCanBusFrame::ErrorFrame)
             view = m_canDevice->interpretErrorFrame(frame);
@@ -266,9 +332,92 @@ void CanManager::processReceivedFrames()
     }
 }
 
+
+
+
 void CanManager::sendFrame(const QCanBusFrame &frame) const
 {
     if (!m_canDevice)
         return;
     m_canDevice->writeFrame(frame);
+}
+
+
+void CanManager::sendDcuCanMsg(int index){
+
+    QCanBusFrame frame;
+    QByteArray load;
+    //= QCanBusFrame(DCU_CAN_ID, load);
+    switch (index)
+    {
+        case DCU_AUTO_REQUEST:
+        {
+            // Format
+            // First four bytes refer to the index
+            // Last two bytes refer to the value
+            load = QByteArrayLiteral("\x01\x00\x00\x00\x02\x00");
+            break;
+        }
+        case DCU_MANUAL_REQUEST:
+        {
+            load = QByteArrayLiteral("\x01\x00\x00\x00\x01\x00");
+
+            break;
+        }
+    }
+    frame = QCanBusFrame(DCU_CAN_ID, load);
+    sendFrame(frame);
+}
+
+void CanManager::sendCanMsg(quint32 id, int index, int data)
+{
+    QCanBusFrame frame;
+    QByteArray load;
+    switch (index)
+    {
+        case DCU_AUTO_REQUEST:
+        {
+            // Format
+            // First four bytes refer to the index
+            // Last two bytes refer to the value
+            load = QByteArrayLiteral("\x01\x00\x00\x00\x02\x00");
+            break;
+        }
+        case DCU_MANUAL_REQUEST:
+        {
+            load = QByteArrayLiteral("\x01\x00\x00\x00\x01\x00");
+
+            break;
+        }
+        case SEVCON_INIT_REQUEST:
+        {
+            // This message tells the gear is in neutral state and the speed is zero.
+            // This message is required to activate the Sevcon driver.
+
+            load = QByteArrayLiteral("\x00\x00\x00\x00\x00\x00");
+            break;
+        }
+    case SEVCON_DRIVE_CMD:
+    {
+        load.resize(3);
+        // Direction byte
+        load[2] = (data > 0)? 0x01 : 0x02;
+        data = abs(data);
+        qDebug() << data;
+        load[0] = (data >> 0) & 0xFF;
+        load[1] = (data >> 8) & 0xFF;
+
+        if (DEBUG_MODE){
+            QByteArray::iterator end = load.end();
+            qDebug() << "Sevcon drive command message data";
+            for (QByteArray::iterator it = load.begin(); it != end; ++it){
+                qDebug() << static_cast<unsigned char>(*it);
+            }
+        }
+
+        break;
+    }
+    }
+    frame = QCanBusFrame(id, load);
+    sendFrame(frame);
 }

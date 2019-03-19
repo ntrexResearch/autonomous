@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>603</width>
-    <height>454</height>
+    <width>443</width>
+    <height>461</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,31 +16,48 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <spacer name="horizontalSpacer">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item row="0" column="2">
-     <widget class="QPushButton" name="ManualActivateButton">
-      <property name="text">
-       <string>Manual On</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="QPushButton" name="AutoActivateButton">
-      <property name="text">
-       <string>Auto On</string>
-      </property>
-     </widget>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QPushButton" name="ManualActivateButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Manual On</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="AutoActivateButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Auto On</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QLCDNumber" name="lcdNumber">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
@@ -49,7 +66,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>603</width>
+     <width>443</width>
      <height>22</height>
     </rect>
    </property>
@@ -64,6 +81,7 @@
    <addaction name="action_ConnectCAN"/>
    <addaction name="action_DisconnectCAN"/>
    <addaction name="action_MonitorCAN"/>
+   <addaction name="action_ManualControl"/>
    <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -92,6 +110,15 @@
    </property>
    <property name="text">
     <string>&amp;MonitorCAN</string>
+   </property>
+  </action>
+  <action name="action_ManualControl">
+   <property name="icon">
+    <iconset resource="image.qrc">
+     <normaloff>:/images/vehicle.png</normaloff>:/images/vehicle.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;ManualControl</string>
    </property>
   </action>
  </widget>

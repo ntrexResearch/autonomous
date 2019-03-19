@@ -7,6 +7,7 @@
 #include <QCanBusDeviceInfo>
 
 
+
 typedef QPair<QCanBusDevice::ConfigurationKey, QVariant> ConfigurationItem;
 struct Settings {
     QString deviceInterfaceName;
@@ -16,12 +17,22 @@ struct Settings {
 
 Q_DECLARE_METATYPE(Settings)
 
+#define DEBUG_MODE true
+
+
 // DCU CAN Bus
-#define DCU_T      0x150
-#define E46_VEHICLE_SPEED   0x000 // Unknown
-#define E46_FUEL_LEVEL      0x613
-#define E46_COOLANT_TEMP    0x329
-#define E46_OIL_TEMP        0x545
+#define DCU_CAN_ID      0x0010
+#define ABS_ENC_CAN_ID  0x0020
+#define MW200D_CAN_ID   0x0001
+#define SEVCON_CAN_ID   0x0300
+#define DCU_CAN_DLC     0x08
+#define ABS_ENC_CAN_DLC 0x08
+#define MW200D_CAN_DLC  0x08
+#define SEVCON_CAN_DLC  0x08
+
+#define PC_CAN_ID       0x0040
+#define PC_CAN_DLC      0x08
+
 // Sevcon Can Bus
 
 // Abs. Encoder Can Bus
@@ -30,5 +41,6 @@ Q_DECLARE_METATYPE(Settings)
 
 // PC Can Bus
 
+int limit_int(int value, int low, int high);
 
 #endif // COMMON_H

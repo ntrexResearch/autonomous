@@ -33,11 +33,14 @@ SOURCES += \
     dialog.cpp \
     bitratebox.cpp \
     sendframebox.cpp \
-    cancommwidget.cpp \
     thread.cpp \
     worker.cpp \
     canthread.cpp \
-    canmonitordialog.cpp
+    canmonitordialog.cpp \
+    StateMachine/states.cpp \
+    speedcontroller.cpp \
+    manualcontroldialog.cpp \
+    common.cpp
 
 
 
@@ -50,14 +53,16 @@ HEADERS += \
     dialog.h \
     bitratebox.h \
     sendframebox.h \
-    cancommwidget.h \
     thread.h \
     canconnectdialog.h \
     thread.h \
     worker.h \
     common.h \
     canthread.h \
-    canmonitordialog.h
+    canmonitordialog.h \
+    StateMachine/states.h \
+    speedcontroller.h \
+    manualcontroldialog.h
 
 RESOURCES += image.qrc
 
@@ -67,7 +72,8 @@ FORMS += \
     dialog.ui \
     sendframebox.ui \
     cancommwidget.ui \
-    canmonitordialog.ui
+    canmonitordialog.ui \
+    manualcontroldialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
