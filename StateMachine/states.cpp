@@ -2,7 +2,8 @@
 
 #include <QStateMachine>
 #include <QDebug>
-#include "speedcontroller.h"
+#include "speedmanager.h"
+#include "steermanager.h"
 
 VehicleState::VehicleState(CanManager *manager, QState *parent)
     : QState(parent),
@@ -72,8 +73,8 @@ void VehicleState::onEntry(QEvent *)
 
 void VehicleState::onExit(QEvent *)
 {
-    if (SpeedController::hasInstance()){
-        SpeedController::destroyInstance();
+    if (SpeedManager::hasInstance()){
+        SpeedManager::destroyInstance();
     }
 }
 
@@ -85,12 +86,16 @@ ManualState::ManualState(CanManager *manager, VehicleState *state, QState *paren
 
 void ManualState::onEntry(QEvent *)
 {
-    if (SpeedController::hasInstance()){
-        SpeedController::destroyInstance();
+    if (SpeedManager::hasInstance()){
+        SpeedManager::destroyInstance();
     }
 
-    SpeedController::Instance();
+    SpeedManager::Instance();
 
+    if (SteerManager::hasInstance()) {
+      SteerManager::destroyInstance();
+    }
+    SteerManager::Instance();
     // Also create manual controller
 
     //When the mode changes, recreate the controller objects
@@ -103,7 +108,7 @@ void ManualState::onEntry(QEvent *)
 void ManualState::onExit(QEvent *)
 {
 
-    SpeedController::destroyInstance();
+    SpeedManager::destroyInstance();
     qDebug() <<"NOw exiting manual state";
 }
 

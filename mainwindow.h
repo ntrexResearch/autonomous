@@ -4,12 +4,13 @@
 #include <QCanBusDevice> // CAN Bus Error
 #include <QMainWindow>
 #include <engine.h>
-#include "canthread.h"
 #include <QStateMachine>
 
 class ManualControlDialog;
 class CanConnectDialog;
 class CanMonitorDialog;
+class SerialConnectDialog;
+class SerialMonitorDialog;
 
 QT_BEGIN_NAMESPACE
 
@@ -42,6 +43,8 @@ private slots:
 
     void manualModeDeactivated();
 
+    void on_OffButton_released();
+
 protected:
     void closeEvent(QCloseEvent *event) override;
 
@@ -53,10 +56,10 @@ private:
     CanConnectDialog *m_canConnectDialog = nullptr;
     CanMonitorDialog *m_canMonitorDialog = nullptr;
     ManualControlDialog *m_manualControlDialog = nullptr;
-
+    SerialConnectDialog *m_serialConnectDialog = nullptr;
+    SerialMonitorDialog *m_serialMonitorDialog = nullptr;
     Engine *engine;
 
-    CanThread *canThread;
 
     QStateMachine *m_system_machine;
 };

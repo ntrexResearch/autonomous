@@ -1,28 +1,30 @@
-#include "speedcontroller.h"
+#include "speedmanager.h"
 #include <QDebug>
-#include "common.h"
+#include "Common/common.h"
 
-SpeedController* SpeedController::_instance = nullptr;
+SpeedManager* SpeedManager::_instance = nullptr;
 
-SpeedController::SpeedController()
+SpeedManager::SpeedManager()
 {
 
 }
 
-SpeedController* SpeedController::Instance()
+SpeedManager* SpeedManager::Instance()
 {
     if (_instance == nullptr)
-        _instance = new SpeedController();
+        _instance = new SpeedManager();
     return _instance;
 }
 
-void SpeedController::destroyInstance()
+void SpeedManager::destroyInstance()
 {
+    if (_instance == nullptr)
+        return;
     delete _instance;
     _instance = nullptr;
 }
 
-bool SpeedController::hasInstance()
+bool SpeedManager::hasInstance()
 {
     if (_instance)
         return true;
@@ -30,7 +32,7 @@ bool SpeedController::hasInstance()
         return false;
 }
 
-int SpeedController::calculateVoltageFromSpeed()
+int SpeedManager::calculateVoltageFromSpeed()
 {
 //    float constant = MAX_VOLTAGE / MAX_MMPS / RPDO_SCALE;
 //    qDebug() << constant;
@@ -43,21 +45,21 @@ int SpeedController::calculateVoltageFromSpeed()
     return driving_voltage;
 }
 
-bool SpeedController::speedChanged() {
+bool SpeedManager::speedChanged() {
     return m_speedChangedFlag;
 }
 
-float SpeedController::currentSpeed() const{
+float SpeedManager::currentSpeed() const{
 
     return m_speed;
 }
 
-void SpeedController::setCurrentSpeed(float speed){
+void SpeedManager::setCurrentSpeed(float speed){
     m_speed = limit_int(speed, -MAX_MMPS, MAX_MMPS);
     m_speedChangedFlag = true;
 }
 
-void SpeedController::incrementSpeed(float speedStep){
+void SpeedManager::incrementSpeed(float speedStep){
     m_speed = limit_int(m_speed + speedStep, -MAX_MMPS, MAX_MMPS);
     m_speedChangedFlag = true;
 }

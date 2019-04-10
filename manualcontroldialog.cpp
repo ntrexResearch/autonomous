@@ -4,6 +4,7 @@
 #include <QDoubleValidator>
 #include <QDebug>
 #include <QKeyEvent>
+#include "steermanager.h"
 
 ManualControlDialog::ManualControlDialog(QWidget *parent) :
     QDialog(parent),
@@ -53,17 +54,28 @@ void ManualControlDialog::on_applyPushButton_released()
 
 void ManualControlDialog::keyPressEvent(QKeyEvent *e)
 {
-    if (SpeedController::hasInstance()){
+    if (SpeedManager::hasInstance()){// && SteerManager::hasInstance()){
         if (e->key() == Qt::Key_Up){
-            SpeedController::Instance()->incrementSpeed(accelStep);
+            SpeedManager::Instance()->incrementSpeed(accelStep);
         }
         else if (e->key() == Qt::Key_Down){
-            SpeedController::Instance()->incrementSpeed(-accelStep);
+            SpeedManager::Instance()->incrementSpeed(-accelStep);
         }
+        else if (e->key() == Qt::Key_Left) {
+            SteerManager::Instance()->incrementTargetSteerAngle(-steerStep);
+        }
+        else if (e->key() == Qt::Key_Right) {
+            SteerManager::Instance()->incrementTargetSteerAngle(steerStep);
+        }
+//        else if (e->key() == Qt::Key_Q) {
+//            SteerManager
+//        }
         else if (e->key() == Qt::Key_Tab || e->key() == Qt::Key_Space){
-            SpeedController::Instance()->setCurrentSpeed(0);
+            SpeedManager::Instance()->setCurrentSpeed(0);
         }
-
+        else if (e->key() == Qt::Key_Escape){
+            this->close();
+        }
     }
 }
 
@@ -82,3 +94,19 @@ void ManualControlDialog::on_SpeedDial_sliderMoved(int position)
 
 }
 
+
+void ManualControlDialog::on_pidGainApplyPushButton_released()
+{
+    //In one thread.
+    if (SteerManager::hasInstance()) {
+        SteerManager::Instance()->setPIDGain(ui->p_gainLineEdit->text().toFloat(), ui->i_gainLineEdit->text().toFloat(),
+                                             ui->d_gainLineEdit->text().toFloat());
+    }
+}
+
+void ManualControlDialog::on_brakeVoltagePushButton_released()
+{
+    if (SteerManager::hasInstance()) {
+        SteerManager::Instance()->setBrakeVoltage(ui->brakeVoltageLineEdit->text().toFloat());
+    }
+}

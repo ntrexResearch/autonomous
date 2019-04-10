@@ -20,6 +20,19 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
+         <widget class="QPushButton" name="OffButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Off</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="ManualActivateButton">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
@@ -82,6 +95,8 @@
    <addaction name="action_DisconnectCAN"/>
    <addaction name="action_MonitorCAN"/>
    <addaction name="action_ManualControl"/>
+   <addaction name="action_connectSerial"/>
+   <addaction name="action_SerialMonitor"/>
    <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -119,6 +134,16 @@
    </property>
    <property name="text">
     <string>&amp;ManualControl</string>
+   </property>
+  </action>
+  <action name="action_connectSerial">
+   <property name="text">
+    <string>&amp;connectSerial</string>
+   </property>
+  </action>
+  <action name="action_SerialMonitor">
+   <property name="text">
+    <string>&amp;SerialMonitor</string>
    </property>
   </action>
  </widget>

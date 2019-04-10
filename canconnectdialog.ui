@@ -100,6 +100,9 @@
       </item>
       <item row="0" column="1">
        <widget class="QPushButton" name="interfaceRefreshButton">
+        <property name="focusPolicy">
+         <enum>Qt::TabFocus</enum>
+        </property>
         <property name="text">
          <string>refresh</string>
         </property>
@@ -144,6 +147,9 @@
      </item>
      <item row="1" column="1">
       <widget class="QPushButton" name="cancelPushButton">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
        <property name="text">
         <string>Cancel</string>
        </property>

@@ -89,6 +89,15 @@ void CanConnectDialog::updateInterfaceList()
         m_ui->interfaceCombo->addItem(info.name());
 }
 
+void CanConnectDialog::keyPressEvent(QKeyEvent *event){
+    if (event->key() == Qt::Key_Enter) {
+        this->ok();
+        event->accept();
+    }else {
+        QDialog::keyPressEvent(event);
+    }
+}
+
 void CanConnectDialog::ok()
 {
     updateSettings();
@@ -186,16 +195,16 @@ void CanConnectDialog::updateSettings()
     }
 
     // process CAN FD setting
-    ConfigurationItem fdItem;
-    fdItem.first = QCanBusDevice::CanFdKey;
-    fdItem.second = m_ui->canFdCombo->currentData();
-    m_currentSettings.configurations.append(fdItem);
+//    ConfigurationItem fdItem;
+//    fdItem.first = QCanBusDevice::CanFdKey;
+//    fdItem.second = m_ui->canFdCombo->currentData();
+//    m_currentSettings.configurations.append(fdItem);
 
-    // process data bitrate
-    const int dataBitrate = m_ui->dataBitrateCombo->bitRate();
-    if (dataBitrate > 0) {
-        const ConfigurationItem item(QCanBusDevice::DataBitRateKey, QVariant(dataBitrate));
-        m_currentSettings.configurations.append(item);
-    }
+//    // process data bitrate
+//    const int dataBitrate = m_ui->dataBitrateCombo->bitRate();
+//    if (dataBitrate > 0) {
+//        const ConfigurationItem item(QCanBusDevice::DataBitRateKey, QVariant(dataBitrate));
+//        m_currentSettings.configurations.append(item);
+//    }
 
 }

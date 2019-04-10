@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui serialbus
+QT       += core gui serialbus serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -38,9 +38,16 @@ SOURCES += \
     canthread.cpp \
     canmonitordialog.cpp \
     StateMachine/states.cpp \
-    speedcontroller.cpp \
     manualcontroldialog.cpp \
-    common.cpp
+    steercontroller.cpp \
+    speedmanager.cpp \
+    steermanager.cpp \
+    Controller/pidcontroller.cpp \
+    Common/common.cpp \
+    serialconnectdialog.cpp \
+    Communication/serialmanager.cpp \
+    serialmonitordialog.cpp
+
 
 
 
@@ -57,12 +64,18 @@ HEADERS += \
     canconnectdialog.h \
     thread.h \
     worker.h \
-    common.h \
     canthread.h \
     canmonitordialog.h \
     StateMachine/states.h \
-    speedcontroller.h \
-    manualcontroldialog.h
+    manualcontroldialog.h \
+    steercontroller.h \
+    speedmanager.h \
+    steermanager.h \
+    Controller/pidcontroller.h \
+    Common/common.h \
+    serialconnectdialog.h \
+    Communication/serialmanager.h \
+    serialmonitordialog.h
 
 RESOURCES += image.qrc
 
@@ -73,7 +86,9 @@ FORMS += \
     sendframebox.ui \
     cancommwidget.ui \
     canmonitordialog.ui \
-    manualcontroldialog.ui
+    manualcontroldialog.ui \
+    serialconnectdialog.ui \
+    serialmonitordialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

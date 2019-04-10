@@ -14,3 +14,7 @@ void Worker::onTimeout() {
 
     qDebug()<<"Thread";
 }
+
+void Controller::handleResults(const QString &test){
+    qDebug() << test;
+}

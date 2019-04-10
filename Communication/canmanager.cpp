@@ -5,8 +5,12 @@
 //#include <mainwindow.h>
 #include <QDebug>
 #include <QMetaType>
-#include "common.h"
-#include "speedcontroller.h"
+#include "Common/common.h"
+#include "speedmanager.h"
+#include "steermanager.h"
+
+#include <QtEndian>
+#include <QThread>
 
 CanManager* CanManager::_instance = nullptr;
 
@@ -16,8 +20,7 @@ CanManager::CanManager() : QObject()
 
     qRegisterMetaType<QCanBusDevice::CanBusError>();
 
-    timer = new QTimer();
-    initCanManager();
+    my_number_test = 1;
 }
 
 CanManager::~CanManager()
@@ -32,12 +35,29 @@ CanManager* CanManager::Instance()
     return _instance;
 }
 
+QTimer *CanManager::getTimer()
+{
+    return timer;
+}
+
 void CanManager::initCanManager()
 {
     QObject::connect(timer, SIGNAL(timeout()), this, SLOT(manageCan()));
-    timer->start(50);
+    timer->start(1);
 }
 
+void CanManager::setMutex(QMutex *mutex)
+{
+    m_mutex = mutex;
+}
+
+void CanManager::start()
+{
+    qDebug() << "Manager "<<QThread::currentThread();
+
+    timer = new QTimer();
+    initCanManager();
+}
 
 void CanManager::activateDCU()
 {
@@ -61,7 +81,10 @@ QCanBusDevice::Filter CanManager::setCanFilter(const unsigned short &id)
     return filter;
 }
 
-
+void CanManager::setSharedNumber(int *number)
+{
+    shared_number_test = number;
+}
 
 void CanManager::manageCan()
 {
@@ -70,17 +93,52 @@ void CanManager::manageCan()
 //        QThread::msleep(1);
 
 //    }
+    //qDebug() << QThread::currentThread();
+
+//    if (shared_number_test) {
+
+//        m_mutex->lock();
+////        qDebug()<<"Thread" << my_number_test<<" num : " << shared_number_test << " *num : " << *shared_number_test;
+////qDebug() << QThread::currentThread();
+////        qDebug() << "Before change, my number : " << my_number_test << " shared numb: " << *shared_number_test;
+//        (*shared_number_test) = my_number_test;
+
+//        //QThread::usleep(10);
+//        if (*shared_number_test != my_number_test) {
+//            qDebug() << " Collision detected at thread " << my_number_test;
+//        }
+//        //qDebug() << "After the change, my number : " << my_number_test << " shared numb : " << *shared_number_test;
+//        m_mutex->unlock();
+//        //QThread::usleep(1);
+
+
+//    }
+//    else {
+//        qDebug() <<" Say";
+//    }
+//    return;
         //qDebug() << m_monitorFlag;
         //qDebug() << "Can test";
-        if (m_canDevice){
-
+//    QCanBusDevice::CanBusDeviceState state = m_canDevice->state();
+    //m_canDevice->setState(QCanBusDevice::CanBusDeviceState::ConnectedState);
+//    qDebug() << "Status " << (state == QCanBusDevice::CanBusDeviceState::ConnectedState);
+//    if (m_canDevice->error()) {
+//        qDebug() << m_canDevice->error();
+//        //m_canDevice->setState(QCanBusDevice::CanBusDeviceState::ConnectedState);
+//    }
+    if (m_canDevice){
+        if (m_canDevice->error()) {
+            qDebug() << m_canDevice->error();
+            return;
+            //m_canDevice->setState(QCanBusDevice::CanBusDeviceState::ConnectedState);
+        }
             //Check the controller objects
             // Use the objects to control the robot
-            if (SpeedController::hasInstance()){
+            if (SpeedManager::hasInstance()){
                 //Calculate the corresponding voltage
                 //Send the voltage with direction
-                if (SpeedController::Instance()->speedChanged()){
-                    int voltage = SpeedController::Instance()->calculateVoltageFromSpeed();
+                if (SpeedManager::Instance()->speedChanged()){
+                    int voltage = SpeedManager::Instance()->calculateVoltageFromSpeed();
 
                     sendCanMsg(SEVCON_CAN_ID, SEVCON_DRIVE_CMD, voltage);
                 }
@@ -98,32 +156,15 @@ void CanManager::manageCan()
 
 
             }
-
-            //qDebug() << "connected";
-            //m_canDevice->writeFrame()
-//            while (m_canDevice->framesAvailable())
-//                m_canDevice->readFrame();
-    //        m_canDevice->waitForFramesWritten(10);
-            //m_canDevice->
-            //if (m_canDevice->framesToWrite() == 0)
-            //if (m_canDevice->error() == QCanBusDevice::NoError){
-                //qDebug() <<m_canDevice->error();
-                //m_canDevice->framesWritten(10);
-                //m_canDevice->writeFrame(frame);
-            //}
-//            else {
-//                //m_canDevice->
-//            }
-        }
-
-        else {
-            //qDebug() << "not conn";
-        }
-        //qDebug() << m_canDevice->
-        //timer->
-        //QThread::sleep(1);
-
-    // If connected,
+            if (SteerManager::hasInstance()) {
+                float output_voltage = SteerManager::Instance()->getTargetVoltage();
+                float brake_voltage = SteerManager::Instance()->getBrakeVoltage();
+                // Make a 200D can message
+                // Fix the data type
+                //sendCanMsg2(MW200D_CAN_ID, STEER_DRIVE_CMD,output_voltage);
+                //endCanMsg2(MW200D_CAN_ID, BRAKE_DRIVE_CMD, brake_voltage);
+            }
+    }
 }
 
 void CanManager::connectCanDevice(Settings p)
@@ -224,6 +265,11 @@ void CanManager::disconnectCanDevice()
 {
     if (!m_canDevice)
         return;
+    //Before disconnecting from the can device, let DCU get back to Off mode state
+    sendDcuCanMsg(DCU_OFF_REQUEST);
+//    sendDcuCanMsg(DCU_MANUAL_REQUEST);
+    m_canDevice->waitForFramesWritten(10);
+    //QThread::sleep(10);
     m_canDevice->disconnectDevice();
     delete m_canDevice;
     m_canDevice = nullptr;
@@ -261,6 +307,8 @@ int CanManager::decodeFrame(const QCanBusFrame &frame)
     int value=0;
     const QByteArray payload = frame.payload();
 
+    //m_canDevice->state()
+    //m_canDevice->
     if(frame.isValid())
     {
         switch(frame.frameId())
@@ -285,7 +333,17 @@ int CanManager::decodeFrame(const QCanBusFrame &frame)
 
             case ABS_ENC_CAN_ID:
             {
+                // Here lock the shared resource and update the current encoder
+                // using the SteerManager
 
+                // First check if steermanager exists
+
+                m_mutex->lock();
+                qint16 single_cnt = qFromLittleEndian<qint16>(payload);
+                qint16 multi_cnt = qFromLittleEndian<qint16>(payload.mid(2,2));
+
+                SteerManager::Instance()->calculateCurrentSteerAngle(single_cnt, multi_cnt);
+                m_mutex->unlock();
                 break;
             }
             case MW200D_CAN_ID:
@@ -354,13 +412,19 @@ void CanManager::sendDcuCanMsg(int index){
         {
             // Format
             // First four bytes refer to the index
-            // Last two bytes refer to the value
+            // rLast two bytes refer to the value
             load = QByteArrayLiteral("\x01\x00\x00\x00\x02\x00");
             break;
         }
         case DCU_MANUAL_REQUEST:
         {
             load = QByteArrayLiteral("\x01\x00\x00\x00\x01\x00");
+
+            break;
+        }
+        case DCU_OFF_REQUEST:
+        {
+            load = QByteArrayLiteral("\x01\x00\x00\x00\x00\x00");
 
             break;
         }
@@ -386,6 +450,12 @@ void CanManager::sendCanMsg(quint32 id, int index, int data)
         case DCU_MANUAL_REQUEST:
         {
             load = QByteArrayLiteral("\x01\x00\x00\x00\x01\x00");
+
+            break;
+        }
+        case DCU_OFF_REQUEST:
+        {
+            load = QByteArrayLiteral("\x01\x00\x00\x00\x00\x00");
 
             break;
         }
@@ -417,6 +487,137 @@ void CanManager::sendCanMsg(quint32 id, int index, int data)
 
         break;
     }
+
+    case STEER_ENABLE_REQUEST:
+    {
+        load.resize(6);
+        load[0] = 0x14;
+        load[1] = 0x65;
+        load[2] = 0x00;
+        load[3] = 0x02;
+        load[4] = 0x01;
+        load[5] = 0x00;
+
+        break;
+    }
+    case STEER_DISABLE_REQUEST:
+    {
+        load.resize(6);
+        load[0] = 0x14;
+        load[1] = 0x65;
+        load[2] = 0x00;
+        load[3] = 0x02;
+        load[4] = 0x00;
+        load[5] = 0x00;
+        break;
+    }
+    case STEER_CLEAR_FAULT:
+    {
+        load.resize(6);
+        load[0] = 0x14;
+        load[1] = 0x65;
+        load[2] = 0x00;
+        load[3] = 0x02;
+        load[4] = 0x02;
+        load[5] = 0x00;
+        break;
+    }
+
+    case BRAKE_ENABLE_REQUEST:
+    {
+        load.resize(6);
+        load[0] = 0x14;
+        load[1] = 0x65;
+        load[2] = 0x00;
+        load[3] = 0x01;
+        load[4] = 0x01;
+        load[5] = 0x00;
+
+        break;
+    }
+    case BRAKE_DISABLE_REQUEST:
+    {
+        load.resize(6);
+        load[0] = 0x14;
+        load[1] = 0x65;
+        load[2] = 0x00;
+        load[3] = 0x01;
+        load[4] = 0x00;
+        load[5] = 0x00;
+        break;
+    }
+    case BRAKE_CLEAR_FAULT:
+    {
+        load.resize(6);
+        load[0] = 0x14;
+        load[1] = 0x65;
+        load[2] = 0x00;
+        load[3] = 0x01;
+        load[4] = 0x02;
+        load[5] = 0x00;
+        break;
+    }
+    }
+    frame = QCanBusFrame(id, load);
+    sendFrame(frame);
+}
+
+void CanManager::sendCanMsg2(quint32 id, int index, float data)
+{
+    QCanBusFrame frame;
+    QByteArray load;
+    switch (index)
+    {
+        case STEER_DRIVE_CMD:
+        {
+            //Check the instance of the Steer Manager
+            if ( ! SteerManager::hasInstance() ){
+                qDebug() << "Steer manager is not created";
+                return;
+            }
+            m_mutex->lock();
+            // Need to lock and access the resource SteerManager to get the target steer
+            load.resize(4);
+            load[0] = 0x1C;
+            load[1] = 0x72;
+            load[2] = 0x00;
+            load[3] = 0x02;
+            load.append(reinterpret_cast<const char*>(&data), sizeof(data));
+//            qDebug() <<"";
+//            for (char c : load){
+//                qDebug() << "Look through the values of the msg" <<static_cast<int>(c);;
+//            }
+//            qDebug() <<"";
+
+
+//            load[4] = (voltage >> 0) & 0xFF;
+//            load[5] = (voltage >> 8) & 0xFF;
+//            load[6] = (voltage >> 16) & 0xFF;
+//            load[7] = (voltage >> 24) & 0xFF;
+            m_mutex->unlock();
+            break;
+        }
+    case BRAKE_DRIVE_CMD:
+    {
+        if ( ! SteerManager::hasInstance() ){
+            qDebug() << "Steer manager is not created";
+            return;
+        }
+        m_mutex->lock();
+        // Need to lock and access the resource SteerManager to get the target steer
+        load.resize(4);
+        qDebug() << " Btrake voltage " << data;
+
+        load[0] = 0x1C;
+        load[1] = 0x72;
+        load[2] = 0x00;
+        load[3] = 0x01;
+        load.append(reinterpret_cast<const char*>(&data), sizeof(data));
+
+        m_mutex->unlock();
+        break;
+    }
+
     }
     frame = QCanBusFrame(id, load);
     sendFrame(frame);

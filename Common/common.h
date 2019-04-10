@@ -26,9 +26,65 @@
                                     // 	NaN								NaN								NaN							Inf								-Inf
 #define IsNaN(x)	((*(int32_t *)&x == 0x7FFFFFFF) || (*(int32_t *)&x == 0xFFFFFFFF) || (*(int32_t *)&x == 0x7FC00000) || (*(int32_t *)&x == 0x7F800000) || (*(int32_t *)&x == 0xFF800000))
 
+
+
+#define DEBUG_MODE true
+
+
+// DCU CAN Bus
+#define DCU_CAN_ID      0x0010
+#define ABS_ENC_CAN_ID  0x0002
+#define MW200D_CAN_ID   0x0001
+#define SEVCON_CAN_ID   0x0300
+#define DCU_CAN_DLC     0x08
+#define ABS_ENC_CAN_DLC 0x08
+#define MW200D_CAN_DLC  0x08
+#define SEVCON_CAN_DLC  0x08
+
+#define PC_CAN_ID       0x0040
+#define PC_CAN_DLC      0x08
+
+
+#define MAX_STEERING_SPEED 72000
+#define MAX_STEERING_VOLTAGE 30.0
+#define MIN_STEERING_VOLTAGE 5.0
+
+// Modify this constant
+#define STEER_SCALE_CONSTANT 1000
+// Sevcon Can Bus
+
+// Abs. Encoder Can Bus
+
+// 200W Motor Driver Can Bus
+
+// PC Can Bus
+
 #ifndef _MSC_VER
 typedef unsigned int UINT;
 #endif
+
+
+
+#include <QString>
+#include <QList>
+
+#include <QCanBusDevice>
+#include <QCanBusDeviceInfo>
+
+
+
+typedef QPair<QCanBusDevice::ConfigurationKey, QVariant> ConfigurationItem;
+struct Settings {
+    QString deviceInterfaceName;
+    QList<ConfigurationItem> configurations;
+    bool useConfigurationEnabled = false;
+};
+
+Q_DECLARE_METATYPE(Settings)
+
+
+int limit_int(int value, int low, int high);
+
 
 //For IIR filter
 const int MaxOrder = 5;
@@ -81,11 +137,6 @@ namespace
             return false;
         }
     }
-
-
-
-
-
 
 
     bool Limit_float(float* out, float max, float min) {

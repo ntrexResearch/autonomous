@@ -3,7 +3,7 @@
 
 #include <QCanBusDevice>
 #include <QCanBusDeviceInfo>
-#include "common.h"
+#include "Common/common.h"
 #include <QDialog>
 
 QT_BEGIN_NAMESPACE
@@ -35,6 +35,10 @@ private slots:
 
 signals:
     void connectCanDevice(Settings);
+
+
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
 
 private:
     QString configurationValue(QCanBusDevice::ConfigurationKey key);

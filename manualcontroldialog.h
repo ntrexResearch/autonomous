@@ -2,7 +2,8 @@
 #define MANUALCONTROLDIALOG_H
 
 #include <QDialog>
-#include "speedcontroller.h"
+#include "speedmanager.h"
+#include <QMutex>
 
 namespace Ui {
 class ManualControlDialog;
@@ -26,11 +27,16 @@ private slots:
     void on_SpeedDial_sliderMoved(int position);
 
 
+    void on_pidGainApplyPushButton_released();
+
+    void on_brakeVoltagePushButton_released();
+
 protected:
     void keyPressEvent(QKeyEvent* e) override;
 
 private:
     float accelStep = 1;
+    float steerStep = 100;
     //float currentSpeed = 0;
 
     Ui::ManualControlDialog *ui;

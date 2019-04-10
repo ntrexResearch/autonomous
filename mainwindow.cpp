@@ -3,6 +3,8 @@
 #include "canconnectdialog.h"
 #include "canmonitordialog.h"
 #include "manualcontroldialog.h"
+#include "serialconnectdialog.h"
+#include "serialmonitordialog.h"
 #include "QLabel"
 
 #include <QCanBus>
@@ -21,9 +23,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     m_ui->setupUi(this);
     //Main engine for statemachine
-
-
-
     initialize();
 
 }
@@ -34,11 +33,11 @@ MainWindow::~MainWindow()
     delete m_canConnectDialog;
     delete m_canMonitorDialog;
     delete m_manualControlDialog;
-
+    delete m_serialConnectDialog;
+    delete m_serialMonitorDialog;
     delete m_ui;
-
+    //~Engine();
     delete engine;
-    delete canThread;
 }
 
 
@@ -47,11 +46,12 @@ void MainWindow::initialize()
     this->setWindowTitle("NTREX AUTONOMOUS");
 
     engine = Engine::Instance(this);
-    canThread = new CanThread();
 
     m_canConnectDialog = new CanConnectDialog;
     m_canMonitorDialog = new CanMonitorDialog;
     m_manualControlDialog = new ManualControlDialog;
+    m_serialConnectDialog = new SerialConnectDialog;
+    m_serialMonitorDialog = new SerialMonitorDialog;
 
     m_ui->action_ConnectCAN->setEnabled(true);
     m_ui->action_DisconnectCAN->setEnabled(false);
@@ -69,6 +69,7 @@ void MainWindow::initialize()
     connect(m_ui->action_ConnectCAN, &QAction::triggered, m_canConnectDialog, &CanConnectDialog::show);
     connect(m_ui->action_DisconnectCAN, &QAction::triggered, CanManager::Instance(), &CanManager::disconnectCanDevice);
     connect(m_ui->action_MonitorCAN, &QAction::triggered, m_canMonitorDialog, &CanMonitorDialog::show );
+    connect(m_ui->action_connectSerial, &QAction::triggered, m_serialConnectDialog, &SerialConnectDialog::show);
     connect(CanManager::Instance(), &CanManager::sendConnectionState, m_canMonitorDialog, &CanMonitorDialog::updateConnectionState);
 
     connect(CanManager::Instance(), &CanManager::sendConnectionState, this, &MainWindow::updateCanConnectionState);
@@ -76,11 +77,18 @@ void MainWindow::initialize()
     connect(m_ui->action_ManualControl, &QAction::triggered, m_manualControlDialog, &ManualControlDialog::show);
 
 
+    connect(m_serialConnectDialog, &SerialConnectDialog::openSensorSerial, engine, &Engine::openSensorSerial);
+    connect(m_serialConnectDialog, &SerialConnectDialog::openBrakeDriverSerial, engine, &Engine::openBrakeDriverSerial);
+
+    connect(m_ui->action_SerialMonitor, &QAction::triggered, m_serialMonitorDialog, &SerialMonitorDialog::show);
+
+
     m_ui->action_ConnectCAN->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_C));
     m_ui->action_MonitorCAN->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_M));
     m_ui->action_DisconnectCAN->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_D));
     m_ui->action_ManualControl->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_X));
-
+    m_ui->action_connectSerial->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_S));
+    m_ui->action_SerialMonitor->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_S | Qt::Key_M));
     m_system_machine = new QStateMachine(this);
 
     VehicleState *vehicleState = new VehicleState(CanManager::Instance(), m_system_machine);
@@ -99,7 +107,6 @@ void MainWindow::initialize()
     m_system_machine->setInitialState(offState);
     m_system_machine->start();
     //connect(CanManager::Instance(), &CanManager::sendConnectionState, )
-    canThread->start();
 
 }
 
@@ -151,4 +158,9 @@ void MainWindow::on_AutoActivateButton_released()
 void MainWindow::on_ManualActivateButton_released()
 {
     CanManager::Instance()->sendDcuCanMsg(DCU_MANUAL_REQUEST);
+}
+
+void MainWindow::on_OffButton_released()
+{
+    CanManager::Instance()->sendDcuCanMsg(DCU_OFF_REQUEST);
 }
