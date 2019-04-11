@@ -7,12 +7,13 @@
 #include <QRegExp>
 #include <QByteArray>
 
-class SerialManager
+class SerialManager : public QObject
 {
+    Q_OBJECT
 public:
-    SerialManager();
+    SerialManager(QObject *parent = nullptr);
 
-    int Send(QByteArray buff);
+    int Send(QString buff);
     bool Receive(QByteArray* _rxBuff);
 
     int getTxBufferSize();
@@ -20,11 +21,23 @@ public:
     bool Open(QString port, QSerialPort::BaudRate baud);
     void Close();
     bool isOpen();
+    int addTxMsg(QString);
+    QString getRxMsg();
+    QString popTxMsg();
+
+private slots:
+    void readAvailable();
+
+signals:
+    void showRxMsg(QString);
 
 private:
     QSerialPort* mSerial = nullptr;
-    QQueue<QByteArray> txQueue;
+    QQueue<QString> txQueue;
     QByteArray rxBuff;
+    QQueue<QString> rxQueue;
+
+    int timeout = 10;
 
 };
 

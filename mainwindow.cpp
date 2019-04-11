@@ -83,6 +83,10 @@ void MainWindow::initialize()
     connect(m_ui->action_SerialMonitor, &QAction::triggered, m_serialMonitorDialog, &SerialMonitorDialog::show);
 
 
+    connect(m_serialMonitorDialog, &SerialMonitorDialog::addBrakeTxMsg, engine, &Engine::enqueueBrakeTxMsg);
+
+    connect(engine->getSerialManager(), &SerialManager::showRxMsg, m_serialMonitorDialog, &SerialMonitorDialog::on_newBrakeRxMsg);
+
     m_ui->action_ConnectCAN->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_C));
     m_ui->action_MonitorCAN->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_M));
     m_ui->action_DisconnectCAN->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_D));

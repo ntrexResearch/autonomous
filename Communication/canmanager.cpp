@@ -149,10 +149,10 @@ void CanManager::manageCan()
             // can device is connected but DCU has not been activated- manual mode on.
             else {
                 // Send DCU Manual request msgx
-                qDebug() <<"Requesting";
+//                qDebug() <<"Requesting";
 
-
-                sendDcuCanMsg(DCU_MANUAL_REQUEST);
+//                if (m_canDevice->)
+//                sendDcuCanMsg(DCU_MANUAL_REQUEST);
 
 
             }

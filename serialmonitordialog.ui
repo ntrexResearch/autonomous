@@ -13,16 +13,6 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QTextBrowser" name="brakeRxTextBrowser">
-   <property name="geometry">
-    <rect>
-     <x>60</x>
-     <y>40</y>
-     <width>431</width>
-     <height>191</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QTextBrowser" name="textBrowser_2">
    <property name="geometry">
     <rect>
@@ -73,6 +63,16 @@
    </property>
    <property name="text">
     <string>Clear</string>
+   </property>
+  </widget>
+  <widget class="QPlainTextEdit" name="brakeRxTextDisplay">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>40</y>
+     <width>381</width>
+     <height>191</height>
+    </rect>
    </property>
   </widget>
  </widget>

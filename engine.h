@@ -29,6 +29,7 @@ public slots:
     void run();
     void openSensorSerial(QString port);
     void openBrakeDriverSerial(QString port);
+    void enqueueBrakeTxMsg(QString);
 
 
 protected:

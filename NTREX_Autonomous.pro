@@ -56,13 +56,11 @@ HEADERS += \
         mainwindow.h \
     engine.h \
     Communication/canmanager.h \
-    canconnectdialog.h \
     dialog.h \
     bitratebox.h \
     sendframebox.h \
     thread.h \
     canconnectdialog.h \
-    thread.h \
     worker.h \
     canthread.h \
     canmonitordialog.h \

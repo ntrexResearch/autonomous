@@ -88,7 +88,12 @@ void Engine::run()
     }
 
     if (m_serialManager->isOpen()){
-        qDebug() << "Size of the buffer " << m_serialManager->getTxBufferSize();
+
+
+        //qDebug() << "Size of the buffer " << m_serialManager->getTxBufferSize();
+        if (m_serialManager->getTxBufferSize() > 0){
+            m_serialManager->Send(m_serialManager->popTxMsg());
+        }
     }
     m_mutex->unlock();
 
@@ -106,10 +111,15 @@ void Engine::openBrakeDriverSerial(QString port)
     if ( ! m_serialManager->isOpen() )
         m_serialManager->Open(port, QSerialPort::Baud115200);
 }
+void Engine::enqueueBrakeTxMsg(QString msg)
+{
+    if ( m_serialManager->isOpen() )
+        m_serialManager->addTxMsg(msg);
+}
 
 void Engine::openSensorSerial(QString port)
 {
-
+    port = "test";
 }
 
 void Engine::setSharedNumber(int* number) {

@@ -44,6 +44,10 @@
 #define PC_CAN_ID       0x0040
 #define PC_CAN_DLC      0x08
 
+#define FRONT_LIDAR_CAN_RX_ID   0x740
+
+#define FRONT_LIDAR_CAN_TX_ID   0x750
+
 
 #define MAX_STEERING_SPEED 72000
 #define MAX_STEERING_VOLTAGE 30.0
